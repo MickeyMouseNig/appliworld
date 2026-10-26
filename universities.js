@@ -1,4 +1,4 @@
-export const universityCatalog = [
+  const universityCatalog = [
   // --- IVY LEAGUE & TOP 20 ELITE UNIVERSITIES ---
   { id: 1, name: "Harvard University", location: "Cambridge, MA", deadlines: [{ round: "REA", date: "2026-11-01", label: "Nov 1, 2026 (REA)" }, { round: "RD", date: "2027-01-01", label: "Jan 1, 2027 (RD)" }], verified: true, site: "https://college.harvard.edu", requirements: ["Common App", "2 Teacher Evaluations", "Midyear Report"] },
   { id: 2, name: "MIT", location: "Cambridge, MA", deadlines: [{ round: "EA", date: "2026-11-01", label: "Nov 1, 2026 (EA)" }, { round: "RD", date: "2027-01-01", label: "Jan 1, 2027 (RD)" }], verified: true, site: "https://mitadmissions.org", requirements: ["MIT Application", "2 Recommendations", "Maker Portfolio"] },
