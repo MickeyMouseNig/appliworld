@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppliWorld - Your Study Abroad Journey, Simplified</title>
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- CSS Connections (Primary & Common Subfolder Fallbacks) -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Public Header (Before Auth) -->
+  <header class="public-header" id="public-header">
+    <div class="pub-container">
+      <a href="index.html" class="logo"><span class="logo-accent">Appli</span>World 🌍</a>
+      <button class="btn-secondary" onclick="openLoginModal()">Log in</button>
+    </div>
+  </header>
+
+  <!-- Public Landing Page (Before Auth) -->
+  <div id="landing-page-container">
+    <section class="hero-section" id="hero-container">
+      <div class="hero-content">
+        <div class="badge">YOUR JOURNEY STARTS HERE</div>
+        <h1 class="hero-title">Your future shouldn't be a guessing game.</h1>
+        <p class="hero-subtitle">
+          Discover universities, understand application requirements, and keep your study-abroad journey organized—all in one place.
+        </p>
+        <div class="hero-cta">
+          <button class="btn-primary" onclick="startQuestionnaire()">Build my application plan →</button>
+        </div>
+        <p class="cta-subtext">4 quick questions. A clearer path forward.</p>
+      </div>
+      <div class="hero-graphic">
+        <div class="purple-glow"></div>
+        <div class="abstract-card">
+          <div class="card-pill">✦ Verified Deadlines</div>
+          <div class="card-line short"></div>
+          <div class="card-line long"></div>
+          <div class="card-stat-group">
+            <div class="mini-stat">
+              <span class="stat-num">200+</span>
+              <span class="stat-label">US Universities</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-num">100%</span>
+              <span class="stat-label">Free Access</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section">
+      <div class="section-header">
+        <h2>Everything you need to get started</h2>
+        <p>Built specifically for international applicants navigating global admissions.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Find your universities</h3>
+          <p>Explore top US institutions and understand their exact admissions requirements.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>Know your deadlines</h3>
+          <p>Never miss EA, ED, or Regular Decision dates with verified, time-accurate schedules.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3>Build your checklist</h3>
+          <p>Turn a complicated application process into a personalized, step-by-step checklist.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📚</div>
+          <h3>Learn as you go</h3>
+          <p>Access free guidance from College Essay Guy, EducationUSA, and top student mentors.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- App Dashboard Layout (Authenticated View) -->
+  <div class="app-layout hidden" id="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-accent">Appli</span>World 🌍
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" onclick="switchSection('home', event)">🏠 Home Dashboard</button>
+        <button class="nav-item" onclick="switchSection('explorer', event)">🏛️ Full 200+ Explorer</button>
+        <button class="nav-item" onclick="switchSection('checklist', event)">✅ My Checklist</button>
+        <button class="nav-item" onclick="switchSection('calendar', event)">📅 Deadlines Calendar</button>
+        <button class="nav-item" onclick="switchSection('guides', event)">📘 Guide Section</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-secondary full-width" onclick="location.reload()">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- SECTION 1: HOME / DASHBOARD -->
+      <section id="section-home" class="app-section">
+        <div class="dashboard-header-bar">
+          <div>
+            <h2 id="welcome-heading">Welcome back! 🌍</h2>
+            <p>Your study-abroad application command center.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dash-card">
+            <h3>My Shortlisted Universities</h3>
+            <p class="stat-big" id="home-shortlist-count">0</p>
+            <span class="stat-desc">Schools on your active target list</span>
+          </div>
+          <div class="dash-card">
+            <h3>Application Tasks</h3>
+            <p class="stat-big" id="home-task-count">0 / 0</p>
+            <span class="stat-desc">Checklist tasks completed</span>
+          </div>
+        </div>
+
+        <!-- Explore US Universities -->
+        <div class="catalog-section" style="margin-top: 3rem;">
+          <div class="section-title-row">
+            <div>
+              <h3>Explore US Universities</h3>
+              <p class="section-sub">Verified deadlines and official requirements for international applicants.</p>
+            </div>
+            <button class="btn-primary" onclick="switchSection('explorer', event)">Explore All 200+ Universities →</button>
+          </div>
+          <div class="university-grid" id="home-university-grid"></div>
+        </div>
+
+        <!-- Resource Center Section at Bottom of Welcome Page -->
+        <div class="resources-section" style="margin-top: 4rem; border-top: 1px solid var(--card-border); padding-top: 3rem;">
+          <h3>Resource Center</h3>
+          <p class="section-sub">Essential guides, essay tools, and financial aid strategies for international students.</p>
+          <div class="resources-grid" id="home-resources-grid"></div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: FULL 200+ UNIVERSITY EXPLORER -->
+      <section id="section-explorer" class="app-section hidden">
+        <div class="section-header-box">
+          <h2>Full 200+ University Catalog</h2>
+          <p>Search and filter through US institutions to expand your target list.</p>
+        </div>
+        <div class="search-bar-wrapper">
+          <input type="text" id="uni-search" placeholder="Search by university name or location (e.g. Harvard, MIT, California)..." oninput="filterUniversities()" />
+        </div>
+        <div class="university-grid" id="full-university-grid"></div>
+      </section>
+
+      <!-- SECTION 3: POLISHED CHECKLIST VIEW -->
+      <section id="section-checklist" class="app-section hidden">
+        <div class="section-header-box">
+          <h2>Application Checklist & Requirements</h2>
+          <p>Track your admissions tasks and review your chosen target institutions.</p>
+        </div>
+        
+        <div class="your-unis-container">
+          <h3>Your Universities</h3>
+          <p class="section-sub">Institutions currently on your active shortlist:</p>
+          <div id="your-unis-chips" class="unis-chips-row"></div>
+        </div>
+
+        <div id="full-checklist-container" style="margin-top: 2rem;"></div>
+      </section>
+
+      <!-- SECTION 4: INTERACTIVE MONTH-TO-MONTH CALENDAR -->
+      <section id="section-calendar" class="app-section hidden">
+        <div class="section-header-box">
+          <h2>Deadlines Calendar (October 2026 – March 2029)</h2>
+          <p>Use the navigation bar to move between months and view deadlines for your selected universities.</p>
+        </div>
+        
+        <div class="calendar-wrapper-card">
+          <div class="calendar-nav-bar">
+            <button class="btn-secondary" onclick="changeCalendarMonth(-1)">‹ Previous Month</button>
+            <h3 id="calendar-month-title">October 2026</h3>
+            <button class="btn-secondary" onclick="changeCalendarMonth(1)">Next Month ›</button>
+          </div>
+
+          <div class="calendar-grid-header">
+            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+          </div>
+          <div class="calendar-days-grid" id="interactive-calendar-grid"></div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: COMPREHENSIVE GUIDE SECTION -->
+      <section id="section-guides" class="app-section hidden">
+        <div class="section-header-box">
+          <h2>AppliWorld Guide Section</h2>
+          <p>Empowering international applicants with crystal-clear explanations and honest admissions strategy.</p>
+        </div>
+
+        <!-- Tab Selector Buttons -->
+        <div class="guide-tabs-bar">
+          <button class="guide-tab-btn active" id="tab-btn-info" onclick="switchGuideTab('info')">
+            📖 Info Guide (Comprehensive System Handbook)
+          </button>
+          <button class="guide-tab-btn" id="tab-btn-app" onclick="switchGuideTab('app')">
+            🚀 Application Guide (Strategic Guidance)
+          </button>
+        </div>
+
+        <!-- TAB 1: COMPREHENSIVE INFO GUIDE -->
+        <div id="guide-tab-info" class="guide-tab-content">
+          <div class="guide-intro-card">
+            <h3>U.S. Admissions Terminology & System Master Guide</h3>
+            <p>U.S. domestic students are guided through these terms for years, while international applicants are often left to piece them together independently. This comprehensive handbook demystifies every component of the U.S. application process.</p>
+          </div>
+
+          <!-- Category 1 -->
+          <div class="guide-category-block">
+            <h4 class="guide-category-title">1. Application Round Options & Strategic Deadlines</h4>
+            <div class="guide-grid">
+              <div class="dash-card">
+                <span class="res-category">EARLY ACTION (EA)</span>
+                <h4>Non-Binding Early Review</h4>
+                <p class="stat-desc">Submit your application early (usually November 1) to receive an admissions decision by December or January. EA is non-binding: you are free to apply to other schools and have until May 1 to make your final choice.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">EARLY DECISION (ED I & ED II)</span>
+                <h4>Binding Commitment Contract</h4>
+                <p class="stat-desc">A legally binding agreement signed by you, your counselor, and your parent. If admitted, you MUST enroll and immediately withdraw all other applications. ED I deadlines are Nov 1; ED II deadlines are around Jan 1. Note: You can break an ED agreement only if the official financial aid offer makes it financially impossible for your family to attend.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">RESTRICTIVE EARLY ACTION (REA / SCEA)</span>
+                <h4>Single-Choice Non-Binding</h4>
+                <p class="stat-desc">Used by top universities (e.g., Harvard, Yale, Princeton, Stanford). It is non-binding, but prohibits you from applying early to any other private U.S. university. You can, however, apply to public universities or non-binding international schools.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">REGULAR DECISION (RD) & ROLLING</span>
+                <h4>Standard & Continuous Evaluation</h4>
+                <p class="stat-desc"><strong>Regular Decision:</strong> Standard deadline (Jan 1 to Jan 15) with decisions released in late March. <br><strong>Rolling Admissions:</strong> Applications are evaluated continuously as they are received until all remaining spots in the class are filled.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 2 -->
+          <div class="guide-category-block">
+            <h4 class="guide-category-title">2. Financial Aid, Scholarships & Funding Mechanisms</h4>
+            <div class="guide-grid">
+              <div class="dash-card">
+                <span class="res-category">ADMISSIONS FINANCIAL POLICIES</span>
+                <h4>Need-Blind vs. Need-Aware</h4>
+                <p class="stat-desc"><strong>Need-Blind:</strong> The university evaluates your academic and personal strength without looking at your financial situation or aid requests. Only ~8 U.S. universities are need-blind for international students. <br><strong>Need-Aware:</strong> Asking for financial aid directly impacts your admission decision. The more financial assistance you request, the higher the competitive threshold for acceptance.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">FINANCIAL AID TYPES</span>
+                <h4>Need-Based Aid vs. Merit Scholarships</h4>
+                <p class="stat-desc"><strong>Need-Based Aid:</strong> Financial support granted purely based on demonstrated family financial need (assessed via the CSS Profile or ISFAA). <br><strong>Merit Scholarships:</strong> Awards granted for exceptional academic performance, test scores, athletic achievements, or leadership—regardless of family wealth.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">SCHOLARSHIP SCOPE</span>
+                <h4>Full Ride vs. Full Tuition</h4>
+                <p class="stat-desc"><strong>Full Tuition:</strong> Covers 100% of instruction costs, leaving room, meals, books, travel, and insurance expenses to you. <br><strong>Full Ride:</strong> Comprehensive funding covering tuition, housing, dining, health insurance, textbooks, and sometimes travel/living stipends.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">FINANCIAL ASSESSMENTS</span>
+                <h4>COA, EFC & SAI Breakdown</h4>
+                <p class="stat-desc"><strong>Cost of Attendance (COA):</strong> Total yearly sticker price including tuition, fees, room, board, and personal costs. <br><strong>Expected Family Contribution (EFC) / SAI:</strong> The official dollar amount the university calculates that your family can afford to pay each year based on submitted income/asset documentation.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 3 -->
+          <div class="guide-category-block">
+            <h4 class="guide-category-title">3. Application Portals, Essays & Portfolio Sections</h4>
+            <div class="guide-grid">
+              <div class="dash-card">
+                <span class="res-category">APPLICATION PORTALS</span>
+                <h4>Common App & Coalition App</h4>
+                <p class="stat-desc">Centralized online platforms allowing you to complete one main demographic profile, personal statement, and activity list, then submit to hundreds of U.S. colleges simultaneously.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">MAIN ESSAY</span>
+                <h4>The Personal Statement</h4>
+                <p class="stat-desc">A 650-word reflective essay sent to all Common App schools. It should highlight your personal background, core values, self-awareness, and unique perspective, rather than simply listing academic achievements.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">COLLEGE ESSAYS</span>
+                <h4>Supplemental Essays ("Supps")</h4>
+                <p class="stat-desc">Institution-specific essay questions requested by individual colleges. Common prompts include "Why this university?", "Why this major?", and community engagement reflections.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">PROFILE SECTIONS</span>
+                <h4>Activities (10 Slots) & Honors (5 Slots)</h4>
+                <p class="stat-desc"><strong>Activities:</strong> Up to 10 extracurricular entries detailing leadership, hours per week, and impact within 150 characters. <br><strong>Honors:</strong> Up to 5 academic awards or competitions won during high school (Grades 9–12).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 4 -->
+          <div class="guide-category-block">
+            <h4 class="guide-category-title">4. School Transcripts, Grading Scales & Recommendations</h4>
+            <div class="guide-grid">
+              <div class="dash-card">
+                <span class="res-category">ACADEMIC RECORDS</span>
+                <h4>Transcripts & Converting Foreign Grades</h4>
+                <p class="stat-desc">Your transcript details grades from SS1–SS3 (Grades 9–12). <em>Important Rule:</em> Never self-convert your national grades (e.g., WAEC, KCSE, CBSE) into a U.S. 4.0 GPA scale unless explicitly instructed. U.S. admissions officers evaluate grades within your local curriculum context.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">SCHOOL CONTEXT</span>
+                <h4>The School Profile</h4>
+                <p class="stat-desc">An official document provided by your high school explaining its grading system, subject rigor, pass rates, and school demographics. It provides admissions officers context to evaluate your academic performance fairly.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">EVALUATIONS</span>
+                <h4>Letters of Recommendation (LORs)</h4>
+                <p class="stat-desc">Formal letters written by 1 Counselor and 1–2 academic teachers (usually from Grade 11 or 12). They speak to your intellectual curiosity, classroom contributions, resilience, and personal character.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">GRADE UPDATES</span>
+                <h4>Midyear & Final Reports</h4>
+                <p class="stat-desc"><strong>Midyear Report:</strong> Grades submitted by your counselor in Jan/Feb of your final year. <br><strong>Final Report:</strong> Official final diploma or exam certificate (e.g., WAEC, A-Levels) sent upon high school graduation.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 5 -->
+          <div class="guide-category-block">
+            <h4 class="guide-category-title">5. Standardized Testing Policies & Language Proficiency</h4>
+            <div class="guide-grid">
+              <div class="dash-card">
+                <span class="res-category">STANDARDIZED TESTS</span>
+                <h4>SAT / ACT & Superscoring</h4>
+                <p class="stat-desc">Aptitude exams testing Math, Reading, and Writing. <br><strong>Superscoring:</strong> When a university takes your highest individual section scores across multiple test dates to create your best possible composite score.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">TESTING POLICIES</span>
+                <h4>Test-Optional vs. Test-Blind</h4>
+                <p class="stat-desc"><strong>Test-Optional:</strong> Scores are evaluated if submitted, but candidates without scores are not penalized. <br><strong>Test-Blind / Score-Free:</strong> The university will not look at or consider SAT/ACT scores even if submitted.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">LANGUAGE EXAMS</span>
+                <h4>ELP Exams (TOEFL, IELTS, DET) & Waivers</h4>
+                <p class="stat-desc">Tests demonstrating English fluency for non-native speakers. Many schools grant ELP waivers if your high school instruction was entirely in English or if you score highly on the SAT Reading & Writing section.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 6 -->
+          <div class="guide-category-block">
+            <h4 class="guide-category-title">6. Post-Acceptance, Visa Formalities & Immigration</h4>
+            <div class="guide-grid">
+              <div class="dash-card">
+                <span class="res-category">ELIGIBILITY DOCS</span>
+                <h4>The Form I-20</h4>
+                <p class="stat-desc">An official U.S. government document issued by your university's Designated School Official (DSO) after you accept your offer and submit liquid proof of family/scholarship funds.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">IMMIGRATION VISA</span>
+                <h4>F-1 Student Visa & Interview</h4>
+                <p class="stat-desc">The official non-immigrant student visa required to enter the U.S. Issued at a U.S. Embassy following a successful DS-160 application and visa interview.</p>
+              </div>
+              <div class="dash-card">
+                <span class="res-category">U.S. TRACKING FEE</span>
+                <h4>SEVIS I-901 Fee & Financial Verification</h4>
+                <p class="stat-desc"><strong>SEVIS Fee:</strong> Mandatory payment to the U.S. Department of Homeland Security before your visa interview. <br><strong>Financial Verification:</strong> Certified bank documentation proving you can cover the remaining first-year expenses listed on your I-20.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: APPLICATION GUIDE -->
+        <div id="guide-tab-app" class="guide-tab-content hidden">
+          <div class="guide-intro-card">
+            <h3>The Honest Application Strategy Guide</h3>
+            <p>College applications are one of the most accessible opportunities you will ever encounter because success isn't about luck—it boils down to <strong>strategy, self-reflection, and hard work</strong>. Here is your step-by-step roadmap to building a compelling, cohesive application.</p>
+          </div>
+
+          <div class="guide-timeline">
+            
+            <!-- Step 1: Main Essay -->
+            <div class="guide-step-card">
+              <div class="step-num-badge">Step 1</div>
+              <div class="step-content">
+                <h4>The Foundation: Your Common App Main Essay</h4>
+                <p>After setting up your Common App account and filling out basic demographics, <strong>start with your personal statement</strong>. Your main essay carries more weight than almost any other single component because it defines your core narrative.</p>
+                <p class="stat-desc" style="margin-top: 0.5rem;">
+                  • <strong>Set the Tone First:</strong> Everything else in your application must either revolve around your essay or complement it without repeating it.<br>
+                  • <strong>Be Authentically You:</strong> Write something that expresses who you are so clearly that if a total stranger read it, they would instantly understand your character.<br>
+                  • <strong>Honesty Matters:</strong> Don't just write what you think admissions officers want to hear. Be genuinely honest—never fabricate stories, as insincerity is easy to spot.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 2: Extracurricular Activities -->
+            <div class="guide-step-card">
+              <div class="step-num-badge">Step 2</div>
+              <div class="step-content">
+                <h4>Strategic Alignment: The Activities List</h4>
+                <p>Once your main essay is written, move directly to your 10 Activities slots. Treat your activities list like a second essay—admissions officers want to know you through what you do with your time.</p>
+                <p class="stat-desc" style="margin-top: 0.5rem;">
+                  • <strong>Order Matters:</strong> Common App asks you to list activities in order of importance to you. If your essay is about writing novels, but novel writing is placed at #10, it creates a disconnect and feels insincere.<br>
+                  • <strong>Process vs. Impact:</strong> Focus descriptions on either the exact process of what you did or the tangible impact (e.g., <em>"Tutored 15 students, raising average test scores by 20%"</em>). Make it about others, not just yourself.<br>
+                  • <strong>Wide Yet Strategic:</strong> Aim for a balance—show diversity in your interests so you aren't too narrow, but stay systematic so your profile doesn't seem scattered.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 3: College Shortlist -->
+            <div class="guide-step-card">
+              <div class="step-num-badge">Step 3</div>
+              <div class="step-content">
+                <h4>Building Your College List (Leveraging AI Prompts)</h4>
+                <p>Select universities based on your personal preferences. A great trick is using ChatGPT to shortlist options tailored to your lifestyle, financial, and climate needs.</p>
+                <p class="stat-desc" style="margin-top: 0.5rem;">
+                  • <strong>Example Prompt:</strong> <em>"I am an international student looking for 10 colleges. I want a small, tight-knit campus community, generous financial aid for international students, a location that gets snow, and a non-crowded environment. Please list 10 universities that match these exact criteria."</em><br>
+                  • <strong>Verify Details:</strong> Always cross-check AI recommendations with the university's official admissions website to confirm financial aid policies for international applicants.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 4: Supplemental Essays & Short Responses -->
+            <div class="guide-step-card">
+              <div class="step-num-badge">Step 4</div>
+              <div class="step-content">
+                <h4>Supplemental Essays & Test Policies</h4>
+                <p>Supplemental essays reveal different dimensions of your personality to specific institutions. If a supplemental essay can be submitted to another college simply by swapping the school name, it isn't specific enough.</p>
+                <p class="stat-desc" style="margin-top: 0.5rem;">
+                  • <strong>Indirect Is the Best Direct:</strong> Show why you fit a school through authentic details (e.g., mentioning Dartmouth’s winter culture and looking forward to drinking hot cocoa while discussing ideas with friends).<br>
+                  • <strong>Testing Context (SAT/ACT):</strong> If applying test-optional or with lower scores, use your application context to show your academic potential, ensuring the school understands any background or resource limitations.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 5: Letters of Recommendation -->
+            <div class="guide-step-card">
+              <div class="step-num-badge">Step 5</div>
+              <div class="step-content">
+                <h4>Letters of Recommendation (Teacher & Counselor Perspectives)</h4>
+                <p>Recommendation letters offer an adult's perspective on who you are in a classroom. They should not be generic lists of accomplishments or teacher bragging.</p>
+                <p class="stat-desc" style="margin-top: 0.5rem;">
+                  • <strong>Stand Out:</strong> Ask teachers who know you deeply to write about what makes you distinct from other students.<br>
+                  • <strong>Strategic Validation:</strong> Use recommendations to highlight qualities or achievements that carry more credibility coming from a teacher than from yourself.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 6: Financial Documents -->
+            <div class="guide-step-card">
+              <div class="step-num-badge">Step 6</div>
+              <div class="step-content">
+                <h4>Financial Documents & Aid Verification</h4>
+                <p>Navigating financial documentation is critical for international applicants requesting aid or proving visa eligibility.</p>
+                <p class="stat-desc" style="margin-top: 0.5rem;">
+                  • <strong>CSS Profile & ISFAA:</strong> These forms require detailed documentation of family income, assets, and expenses. Fill them out accurately and ensure all figures match official tax or bank records.<br>
+                  • <strong>Proof of Funding (Bank Statements):</strong> If applying to schools requiring proof of funds upfront, prepare stamped, official bank statements showing available liquid funds.<br>
+                  • <strong>Fee Waivers:</strong> If the CSS Profile fee presents a financial hardship, request a CSS Profile fee waiver directly from the university's financial aid office.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Onboarding Questionnaire Modal -->
+  <section class="wizard-section hidden" id="wizard-container">
+    <div class="wizard-card">
+      <div class="wizard-header">
+        <span class="step-indicator" id="step-indicator">Question 1 of 4</span>
+        <button class="close-btn" onclick="cancelQuestionnaire()">✕</button>
+      </div>
+
+      <div class="question-step active" id="step-1">
+        <h2>Where would you like to study?</h2>
+        <div class="options-grid">
+          <button class="option-card" onclick="selectOption(1, 'United States')">🇺🇸 United States</button>
+          <button class="option-card" onclick="selectOption(1, 'United Kingdom')">🇬🇧 United Kingdom</button>
+          <button class="option-card" onclick="selectOption(1, 'Canada')">🇨🇦 Canada</button>
+          <button class="option-card" onclick="selectOption(1, 'Other Destinations')">🌐 Other Destinations</button>
+        </div>
+      </div>
+
+      <div class="question-step hidden" id="step-2">
+        <h2>What is your current education level?</h2>
+        <div class="options-grid">
+          <button class="option-card" onclick="selectOption(2, 'High School Student')">Secondary / High School Student</button>
+          <button class="option-card" onclick="selectOption(2, 'High School Graduate')">High School Graduate / Gap Year</button>
+          <button class="option-card" onclick="selectOption(2, 'University Transfer')">Current University Student</button>
+        </div>
+      </div>
+
+      <div class="question-step hidden" id="step-3">
+        <h2>When do you hope to start university?</h2>
+        <div class="options-grid">
+          <button class="option-card" onclick="selectOption(3, 'Fall 2026/2027')">Fall 2026 or 2027</button>
+          <button class="option-card" onclick="selectOption(3, 'Fall 2028')">Fall 2028</button>
+        </div>
+      </div>
+
+      <div class="question-step hidden" id="step-4">
+        <h2>What is your primary focus right now?</h2>
+        <div class="options-grid">
+          <button class="option-card" onclick="selectOption(4, 'Financial Aid & Scholarships')">Financial Aid & Full Scholarships</button>
+          <button class="option-card" onclick="selectOption(4, 'Tracking Deadlines')">Tracking Deadlines & Requirements</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auth Modal -->
+  <div class="auth-modal hidden" id="auth-modal">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2 id="auth-title">Welcome to AppliWorld</h2>
+        <button class="close-btn" onclick="closeAuthModal()">✕</button>
+      </div>
+      <p id="auth-subtitle" class="auth-sub">Sign up to save your university plan and track deadlines.</p>
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" id="auth-email" required placeholder="student@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="auth-password" required placeholder="At least 6 characters" />
+        </div>
+        <button type="submit" class="btn-primary full-width" id="auth-submit-btn">Create Account</button>
+      </form>
+      <div class="auth-switch">
+        <p id="auth-switch-text">Already have an account? <a href="#" onclick="toggleAuthMode(event)">Log in</a></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 AppliWorld. Built for international students, by international students.</p>
+  </footer>
+
+  <!-- Script Connections (Primary & Common Subfolder Fallbacks) -->
+  <script src="universities.js"></script>
+  <script src="js/universities.js"></script>
+  
+  <script src="script.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
