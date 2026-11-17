@@ -78,11 +78,6 @@ async function handleAuthSubmit(event) {
   if (isLoginMode) {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) { alert("Error logging in: " + error.message); return; }
-    if (data.user && !data.user.email_confirmed_at) {
-      await supabaseClient.auth.signOut();
-      alert("Please verify your email address before logging in. Check your inbox for the confirmation link!");
-      return;
-    }
     currentAuthenticatedEmail = email;
     alert("Successfully logged in!");
     closeAuthModal();
@@ -90,8 +85,10 @@ async function handleAuthSubmit(event) {
   } else {
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { alert("Error signing up: " + error.message); return; }
-    alert("Account created! Check your email for the confirmation link.");
+    alert("Account created successfully!");
     closeAuthModal();
+    currentAuthenticatedEmail = email;
+    launchAppDashboard(email);
   }
 }
 
@@ -124,7 +121,6 @@ function switchSection(sectionId, event) {
   });
 }
 
-// --- GUIDE SECTION TAB SWITCHER ---
 function switchGuideTab(tabName) {
   const infoContent = document.getElementById('guide-tab-info');
   const appContent = document.getElementById('guide-tab-app');
@@ -260,7 +256,6 @@ function toggleTask(taskId) {
   renderHomeDashboard();
 }
 
-// --- INTERACTIVE MONTH-TO-MONTH CALENDAR (Oct 2026 - Mar 2029) ---
 function changeCalendarMonth(direction) {
   calendarMonth += direction;
   if (calendarMonth > 11) {
@@ -307,7 +302,6 @@ function renderInteractiveCalendar() {
     const formattedDay = String(day).padStart(2, '0');
     const dateString = `${calendarYear}-${formattedMonth}-${formattedDay}`;
 
-    // Highlight TODAY (October 22, 2026)
     const isToday = (calendarYear === 2026 && calendarMonth === 9 && day === 22);
 
     const matchingDeadlines = [];
