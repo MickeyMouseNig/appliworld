@@ -9,10 +9,6 @@ let userShortlist = [];
 const completedTasks = new Set();
 let currentAuthenticatedEmail = "";
 
-// Calendar state initialized to October 2026
-let calendarYear = 2026;
-let calendarMonth = 9; // 9 = October
-
 function startQuestionnaire() {
   document.getElementById('wizard-container').classList.remove('hidden');
 }
@@ -103,7 +99,6 @@ function launchAppDashboard(email) {
   renderHomeDashboard();
   renderExplorerGrid(universityCatalog);
   renderResources();
-  renderInteractiveCalendar();
 }
 
 function switchSection(sectionId, event) {
@@ -244,7 +239,6 @@ function toggleShortlist(uniId) {
   }
   renderHomeDashboard();
   renderExplorerGrid(universityCatalog);
-  renderInteractiveCalendar();
 }
 
 function toggleTask(taskId) {
@@ -254,83 +248,6 @@ function toggleTask(taskId) {
     completedTasks.add(taskId);
   }
   renderHomeDashboard();
-}
-
-function changeCalendarMonth(direction) {
-  calendarMonth += direction;
-  if (calendarMonth > 11) {
-    calendarMonth = 0;
-    calendarYear++;
-  } else if (calendarMonth < 0) {
-    calendarMonth = 11;
-    calendarYear--;
-  }
-
-  if (calendarYear < 2026 || (calendarYear === 2026 && calendarMonth < 9)) {
-    calendarYear = 2026;
-    calendarMonth = 9;
-  }
-  if (calendarYear > 2029 || (calendarYear === 2029 && calendarMonth > 2)) {
-    calendarYear = 2029;
-    calendarMonth = 2;
-  }
-
-  renderInteractiveCalendar();
-}
-
-function renderInteractiveCalendar() {
-  const titleEl = document.getElementById('calendar-month-title');
-  const gridEl = document.getElementById('interactive-calendar-grid');
-  if (!titleEl || !gridEl) return;
-
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  titleEl.innerText = `${monthNames[calendarMonth]} ${calendarYear}`;
-
-  const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
-  const totalDays = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-
-  const selectedUnis = universityCatalog.filter(uni => userShortlist.includes(uni.id));
-
-  let markup = "";
-
-  for (let i = 0; i < firstDayIndex; i++) {
-    markup += `<div class="calendar-day empty"></div>`;
-  }
-
-  for (let day = 1; day <= totalDays; day++) {
-    const formattedMonth = String(calendarMonth + 1).padStart(2, '0');
-    const formattedDay = String(day).padStart(2, '0');
-    const dateString = `${calendarYear}-${formattedMonth}-${formattedDay}`;
-
-    const isToday = (calendarYear === 2026 && calendarMonth === 9 && day === 22);
-
-    const matchingDeadlines = [];
-    selectedUnis.forEach(uni => {
-      uni.deadlines.forEach(d => {
-        if (d.date === dateString) {
-          matchingDeadlines.push({ uniName: uni.name, round: d.round });
-        }
-      });
-    });
-
-    const hasDeadline = matchingDeadlines.length > 0;
-
-    let classList = "calendar-day";
-    if (isToday) classList += " today";
-    if (hasDeadline) classList += " deadline";
-
-    markup += `
-      <div class="${classList}">
-        <strong>${day}</strong>
-        <div>
-          ${isToday ? '<span style="color: #3b82f6; font-size: 0.7rem; font-weight: 700;">● Today</span>' : ''}
-          ${hasDeadline ? matchingDeadlines.map(m => `<div class="deadline-tag" title="${m.uniName} (${m.round})">${m.uniName} (${m.round})</div>`).join('') : ''}
-        </div>
-      </div>
-    `;
-  }
-
-  gridEl.innerHTML = markup;
 }
 
 function renderResources() {
